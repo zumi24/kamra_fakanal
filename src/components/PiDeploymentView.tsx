@@ -385,6 +385,50 @@ PORT=${customPort} docker compose up -d --build
                   {venvOneLiner}
                 </pre>
               </div>
+
+              {/* Step 4: Updating from GitHub */}
+              <div className="bg-white border border-[#E7E2DA] rounded-xl p-6 space-y-4">
+                <div className="flex items-center justify-between flex-wrap gap-2">
+                  <div className="flex items-center gap-2.5">
+                    <GitBranch className="w-4 h-4 text-[#B93829]" />
+                    <h2 className="font-display text-lg font-semibold text-[#1C1917]">
+                      04. Frissítés a jövőben GitHub-ról (Adatvesztés nélkül)
+                    </h2>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      copyText(
+                        'update',
+                        `chmod +x update-pi.sh\n./update-pi.sh`
+                      )
+                    }
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-[#FAF8F5] border border-[#E7E2DA] rounded-lg hover:bg-[#F3EFEA]"
+                  >
+                    {copiedKey === 'update' ? (
+                      <>
+                        <Check className="w-3.5 h-3.5 text-[#3F624D]" />
+                        Másolva
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="w-3.5 h-3.5" />
+                        Másolás
+                      </>
+                    )}
+                  </button>
+                </div>
+
+                <p className="text-xs text-[#57534E] leading-relaxed">
+                  Ha a GitHub-on új verziót publikálsz, a Raspberry Pi-n egyszerűen futtasd a beépített frissítő scriptet. Ez automatikusan megőrzi a Pi-n rögzített új receptjeidet (<span className="font-mono-num text-[#1C1917]">data/recipes.json</span>), letölti az új kódot, újrafordítja a felületet és újraindítja a szervert:
+                </p>
+
+                <pre className="p-4 rounded-lg bg-[#1C1917] text-[#FAF8F5] font-mono-num text-xs overflow-x-auto leading-relaxed">
+                  {`# Automatikus, biztonságos frissítés a Pi-n egyetlen paranccsal:
+chmod +x update-pi.sh
+./update-pi.sh`}
+                </pre>
+              </div>
             </>
           ) : activeDeployMode === 'node' ? (
             <div className="bg-white border border-[#E7E2DA] rounded-xl p-6 space-y-4">
