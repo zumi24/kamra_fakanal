@@ -40,6 +40,7 @@ export interface WeeklyMealSlot {
 }
 
 export interface ServerStatusInfo {
+  version?: string;
   targetPort: number;
   activePort: number;
   storagePath: string;

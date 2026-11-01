@@ -11,8 +11,10 @@ import {
   Layers,
   Cpu,
   ShieldCheck,
+  Sliders,
 } from 'lucide-react';
 import { Recipe, ServerStatusInfo } from '../types/recipe';
+import { APP_VERSION, APP_RELEASE_DATE } from '../config/version';
 
 interface PiDeploymentViewProps {
   recipes: Recipe[];
@@ -26,6 +28,7 @@ export const PiDeploymentView: React.FC<PiDeploymentViewProps> = ({
   onImportRecipes,
 }) => {
   const [activeDeployMode, setActiveDeployMode] = useState<'venv' | 'node' | 'docker'>('venv');
+  const [customPort, setCustomPort] = useState<number>(serverInfo?.targetPort || 5050);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const [importMessage, setImportMessage] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -43,16 +46,6 @@ export const PiDeploymentView: React.FC<PiDeploymentViewProps> = ({
     const a = document.createElement('a');
     a.href = url;
     a.download = `csaladi-receptek-adatbazis-${new Date().toISOString().slice(0, 10)}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-  };
-
-  const handleDownloadFile = (filename: string, content: string, mime: string) => {
-    const blob = new Blob([content], { type: `${mime};charset=utf-8` });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -77,7 +70,7 @@ export const PiDeploymentView: React.FC<PiDeploymentViewProps> = ({
     reader.readAsText(file);
   };
 
-  // Commands strings
+  // Commands dynamically formatted with user's selected port
   const venvCommands = `# 1. Python virtuális környezet (venv) létrehozása és aktiválása
 python3 -m venv venv
 source venv/bin/activate
@@ -89,24 +82,22 @@ pip install -r requirements.txt
 # 3. Webes felület lefordítása (ha még nincs dist mappa)
 npm install && npm run build
 
-# 4. Szerver indítása az 5000-es porton (a venv-ből)
-PORT=5000 python app.py`;
+# 4. Szerver indítása a kiválasztott ${customPort}-es porton (a venv-ből)
+PORT=${customPort} python app.py`;
 
-  const venvOneLiner = `# Automatikus mindent-egyben beállítás és indítás:
-chmod +x setup-venv.sh
-./setup-venv.sh
+  const venvOneLiner = `# Automatikus mindent-egyben beállítás és indítás (${customPort}-es port):
+PORT=${customPort} ./setup-venv.sh
 
 # Későbbi gyorsindítás a venv-ből egyetlen paranccsal:
-./run-venv.sh
+PORT=${customPort} ./run-venv.sh
 
 # Vagy automatikus háttérszolgáltatásként (rendszerinduláskor indul):
-chmod +x install-pi-venv.sh
-./install-pi-venv.sh`;
+PORT=${customPort} ./install-pi-venv.sh`;
 
   const githubCommands = `# 1. Töltsd fel a kódot saját GitHub repóba
 git init
 git add .
-git commit -m "Kamra es Fakanal csaladi recepttar (Python venv + Pi 4)"
+git commit -m "Kamra es Fakanal csaladi recepttar (Port ${customPort} + venv)"
 git branch -M main
 git remote add origin https://github.com/FELHASZNALONEV/csaladi-recepttar.git
 git push -u origin main
@@ -115,13 +106,13 @@ git push -u origin main
 git clone https://github.com/FELHASZNALONEV/csaladi-recepttar.git
 cd csaladi-recepttar`;
 
-  const nodeCommands = `# Node.js natív futtatás (ha nem Python venv-et használsz)
+  const nodeCommands = `# Node.js futtatás (ha nem Python venv-et használsz)
 npm install
 npm run build
-PORT=5000 NODE_ENV=production npm start`;
+PORT=${customPort} NODE_ENV=production npm start`;
 
-  const dockerCommands = `# Docker Compose futtatás (konténeres izoláció)
-docker compose up -d --build
+  const dockerCommands = `# Docker Compose futtatás (${customPort}-es porton)
+PORT=${customPort} docker compose up -d --build
 # A receptek megmaradnak a helyi data/ mappában`;
 
   return (
@@ -134,21 +125,64 @@ docker compose up -d --build
             <span aria-hidden="true">·</span>
             <span>Python 3 venv / Node.js / Docker</span>
             <span aria-hidden="true">·</span>
-            <span className="font-mono-num font-semibold text-[#B93829]">Port: 5000</span>
+            <span className="font-mono-num font-semibold text-[#B93829]">Port: {customPort}</span>
+            <span aria-hidden="true">·</span>
+            <span className="font-mono-num font-bold text-[#1C1917] bg-[#FAF8F5] border border-[#E7E2DA] px-2 py-0.5 rounded">
+              {APP_VERSION}
+            </span>
           </div>
 
           <h1 className="font-display text-2xl sm:text-3xl font-bold text-[#1C1917]">
-            Virtuális Futtatás (venv) &amp; Raspberry Pi 4 Telepítés
+            Virtuális Futtatás (venv) a {customPort}-es Porton
           </h1>
 
           <p className="text-sm sm:text-base text-[#57534E] mt-2 leading-relaxed">
-            A legújabb Raspberry Pi OS (Debian 12 Bookworm) a biztonságos, izolált Python csomagkezeléshez
-            megköveteli a <strong>virtuális környezet (venv)</strong> használatát. Az alkalmazáshoz elkészítettük a
-            teljes Python Flask backendet (<span className="font-mono-num text-[#1C1917]">app.py</span>), a{' '}
-            <span className="font-mono-num text-[#1C1917]">requirements.txt</span>-t és az automatikus{' '}
-            <span className="font-mono-num text-[#1C1917]">setup-venv.sh</span> scriptet, így a Pi-n semmilyen rendszerszintű
-            csomagütközés nem fordulhat elő.
+            Hogy véletlenül se akadjon össze egy másik, 5000-es portot használó programmal (pl. AirPlay, OctoPrint, más helyi szerverek),
+            az alapértelmezett portot átállítottuk az <strong>{customPort}</strong>-re. Az alábbi mezőben bármilyen más szabad portot is beírhatsz, és a parancsok automatikusan frissülnek.
           </p>
+        </div>
+
+        {/* Port Customizer Strip */}
+        <div className="mt-6 p-4 rounded-xl bg-[#FAF8F5] border border-[#E7E2DA] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-2.5">
+            <Sliders className="w-4 h-4 text-[#B93829]" />
+            <div>
+              <div className="text-xs font-semibold text-[#1C1917]">
+                Kívánt hálózati port módosítása
+              </div>
+              <div className="text-xs text-[#78716C]">
+                Írj be egy tetszőleges szabad portot (pl. 5050, 8050, 8088, 8888, 9000):
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-medium text-[#57534E]">PORT=</span>
+            <input
+              type="number"
+              min={1024}
+              max={65535}
+              value={customPort}
+              onChange={(e) => setCustomPort(Number(e.target.value) || 5050)}
+              className="w-24 px-3 py-1.5 text-sm font-mono-num font-bold bg-white border border-[#E7E2DA] rounded-lg text-[#B93829] focus:outline-none focus:border-[#B93829]"
+            />
+            <div className="flex gap-1">
+              {[5050, 8050, 8888].map((preset) => (
+                <button
+                  key={preset}
+                  type="button"
+                  onClick={() => setCustomPort(preset)}
+                  className={`px-2 py-1 text-xs rounded border transition-colors ${
+                    customPort === preset
+                      ? 'bg-[#B93829] text-white border-[#B93829]'
+                      : 'bg-white border-[#E7E2DA] text-[#57534E] hover:text-[#1C1917]'
+                  }`}
+                >
+                  {preset}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
 
         {/* Technical Spec Row */}
@@ -156,10 +190,10 @@ docker compose up -d --build
           <div className="p-4 rounded-lg bg-[#FAF8F5] border border-[#E7E2DA]">
             <div className="text-xs text-[#78716C]">Hálózati Célport</div>
             <div className="font-mono-num text-lg font-bold text-[#B93829] mt-1">
-              0.0.0.0:5000
+              0.0.0.0:{customPort}
             </div>
             <div className="text-xs text-[#57534E] mt-0.5">
-              http://raspberrypi.local:5000
+              http://raspberrypi.local:{customPort}
             </div>
           </div>
 
@@ -190,7 +224,7 @@ docker compose up -d --build
               csaladi-recepttar-venv
             </div>
             <div className="text-xs text-[#57534E] mt-0.5">
-              Indulás újraindításkor
+              Port: {customPort} (bekapcsoláskor indul)
             </div>
           </div>
         </div>
@@ -282,7 +316,7 @@ docker compose up -d --build
                   <div className="flex items-center gap-2.5">
                     <Terminal className="w-4 h-4 text-[#B93829]" />
                     <h2 className="font-display text-lg font-semibold text-[#1C1917]">
-                      02. Futtatás virtuális környezetben (Python venv)
+                      02. Futtatás virtuális környezetben a {customPort}-es porton
                     </h2>
                   </div>
                   <button
@@ -307,7 +341,7 @@ docker compose up -d --build
                 <p className="text-xs text-[#57534E] leading-relaxed">
                   A következő parancsok létrehozzák az izolált <span className="font-mono-num text-[#1C1917]">venv</span> mappát,
                   telepítik a <span className="font-mono-num text-[#1C1917]">requirements.txt</span> csomagjait (Flask, CORS, Gunicorn),
-                  majd elindítják az alkalmazást az 5000-es porton:
+                  majd elindítják az alkalmazást a <strong className="text-[#1C1917]">{customPort}</strong>-es porton:
                 </p>
 
                 <pre className="p-4 rounded-lg bg-[#1C1917] text-[#FAF8F5] font-mono-num text-xs overflow-x-auto leading-relaxed">
@@ -321,7 +355,7 @@ docker compose up -d --build
                   <div className="flex items-center gap-2.5">
                     <Cpu className="w-4 h-4 text-[#B93829]" />
                     <h2 className="font-display text-lg font-semibold text-[#1C1917]">
-                      03. Kényelmi automatizáló scriptek (Beépítve a repóban)
+                      03. Kényelmi automatizáló scriptek (Port: {customPort})
                     </h2>
                   </div>
                   <button
@@ -344,7 +378,7 @@ docker compose up -d --build
                 </div>
 
                 <p className="text-xs text-[#57534E] leading-relaxed">
-                  Hogy ne kelljen manuálisan gépelned a lépéseket, a projekt gyökerében készen áll a három dedikált venv script:
+                  A scriptek közvetlenül fogadják a kívánt <span className="font-mono-num text-[#1C1917]">PORT={customPort}</span> paramétert:
                 </p>
 
                 <pre className="p-4 rounded-lg bg-[#1C1917] text-[#FAF8F5] font-mono-num text-xs overflow-x-auto leading-relaxed">
@@ -358,7 +392,7 @@ docker compose up -d --build
                 <div className="flex items-center gap-2.5">
                   <Server className="w-4 h-4 text-[#B93829]" />
                   <h2 className="font-display text-lg font-semibold text-[#1C1917]">
-                    Node.js 20 LTS futtatás (tsx / server.ts)
+                    Node.js 20 LTS futtatás ({customPort}-es port)
                   </h2>
                 </div>
                 <button
@@ -390,7 +424,7 @@ docker compose up -d --build
                 <div className="flex items-center gap-2.5">
                   <Layers className="w-4 h-4 text-[#B93829]" />
                   <h2 className="font-display text-lg font-semibold text-[#1C1917]">
-                    Docker Compose Futtatás (Port 5000)
+                    Docker Compose Futtatás ({customPort}-es port)
                   </h2>
                 </div>
                 <button
@@ -472,7 +506,7 @@ docker compose up -d --build
             <div className="flex items-center gap-2.5">
               <Server className="w-4 h-4 text-[#B93829]" />
               <h2 className="font-display text-lg font-semibold text-[#1C1917]">
-                Hálózati elérés a lakásban (Wi-Fi)
+                Hálózati elérés a lakásban (Port: {customPort})
               </h2>
             </div>
 
@@ -480,12 +514,12 @@ docker compose up -d --build
               <li>
                 <strong className="text-[#1C1917]">1. Helyi IP cím alapján:</strong> nyisd meg bármely
                 otthoni Wi-Fi-re csatlakozott telefonon vagy konyhai tableten a{' '}
-                <span className="font-mono-num text-[#1C1917]">http://192.168.1.X:5000</span> címet.
+                <span className="font-mono-num text-[#1C1917]">http://192.168.1.X:{customPort}</span> címet.
               </li>
               <li>
                 <strong className="text-[#1C1917]">2. mDNS névvel:</strong> amennyiben a Raspberry Pi
                 alapértelmezett hostneve aktív, közvetlenül elérhető a{' '}
-                <span className="font-mono-num text-[#1C1917]">http://raspberrypi.local:5000</span> címen.
+                <span className="font-mono-num text-[#1C1917]">http://raspberrypi.local:{customPort}</span> címen.
               </li>
               <li>
                 <strong className="text-[#1C1917]">3. Konyhai könyvjelző:</strong> iOS és Android

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Kamra & Fakanál — Családi Recepttár Python Flask Webszerver (Port: 5000)
+Kamra & Fakanál — Családi Recepttár Python Flask Webszerver (Port: 5050)
 Kifejezetten Raspberry Pi 4-en való futtatásra virtuális környezetben (venv).
 """
 
@@ -249,11 +249,12 @@ CORS(app)
 @app.route("/api/server-info", methods=["GET"])
 def server_info():
     recipes = load_recipes()
-    target_port = int(os.environ.get("PORT", 5000))
+    target_port = int(os.environ.get("PORT", 5050))
     hostname = socket.gethostname()
     venv_active = is_virtualenv()
 
     return jsonify({
+        "version": "v1.1.0",
         "targetPort": target_port,
         "activePort": target_port,
         "storagePath": "data/recipes.json",
@@ -375,7 +376,7 @@ def serve_frontend(path):
 
 if __name__ == "__main__":
     ensure_data_dir()
-    port = int(os.environ.get("PORT", 5000))
+    port = int(os.environ.get("PORT", 5050))
     host = os.environ.get("HOST", "0.0.0.0")
     venv_status = "AKTIV (venv)" if is_virtualenv() else "NINCS VENV (Rendszer Python)"
     print("=" * 60)

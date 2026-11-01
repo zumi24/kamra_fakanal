@@ -1,13 +1,15 @@
 #!/usr/bin/env bash
-# Kamra & Fakanál — Automatikus Python venv előkészítő és indító script (Port: 5000)
+# Kamra & Fakanál — Automatikus Python venv előkészítő és indító script (Port: 5050)
 set -e
 
 APP_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "${APP_DIR}"
 
+PORT="${PORT:-5050}"
+
 echo "=========================================================="
 echo "  Kamra & Fakanál — Python venv Virtuális Környezet      "
-echo "  Port: 5000 (Helyi hálózat / Raspberry Pi 4)           "
+echo "  Beállított Port: ${PORT} (Raspberry Pi 4 / Helyi Wi-Fi)"
 echo "=========================================================="
 
 # 1. Ellenőrizzük a python3-venv csomagot
@@ -47,10 +49,10 @@ LOCAL_IP=$(hostname -I 2>/dev/null | awk '{print $1}' || echo "127.0.0.1")
 echo "=========================================================="
 echo "  A virtuális környezet (venv) sikeresen beállítva!"
 echo "  Indítás venv-ből: ./run-venv.sh"
-echo "  Hálózati elérés: http://${LOCAL_IP}:5000"
+echo "  Hálózati elérés: http://${LOCAL_IP}:${PORT}"
 echo "=========================================================="
 
 # Azonnali indítás
-export PORT=5000
-export HOST=0.0.0.0
+export PORT="${PORT}"
+export HOST="0.0.0.0"
 ./venv/bin/python app.py

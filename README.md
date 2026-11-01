@@ -1,6 +1,6 @@
-# Kamra & Fakanál — Családi Recepttár (Raspberry Pi 4 · Python venv · Port 5000)
+# Kamra & Fakanál — Családi Recepttár (Raspberry Pi 4 · Python venv · Port 5050)
 
-Platformfüggetlen családi receptadatbázis és helyi hálózati webszerver, amelyet kifejezetten **Raspberry Pi 4-en való virtuális futtatásra (Python `venv`)**, valamint otthoni Wi-Fi hálózati kiszolgálásra (5000-es port) terveztünk.
+Platformfüggetlen családi receptadatbázis és helyi hálózati webszerver, amelyet kifejezetten **Raspberry Pi 4-en való virtuális futtatásra (Python `venv`)**, valamint otthoni Wi-Fi hálózati kiszolgálásra (alapértelmezetten **5050-es porton**, hogy semmilyen más helyi programmal ne ütközzön) terveztünk.
 
 ---
 
@@ -24,12 +24,16 @@ A script:
 1. Létrehozza az izolált `venv` virtuális környezetet (`python3 -m venv venv`)
 2. Telepíti a függőségeket a venv-be (`pip install -r requirements.txt`)
 3. Lefordítja a modern webes felületet (`npm run build`)
-4. Elindítja a Flask webszervert a venv-ből az **5000-es porton**.
+4. Elindítja a Flask webszervert a venv-ből az **5050-es porton** (vagy az általad megadott porton).
 
 ---
 
-### 3. Lépés: Manuális venv parancsok (ha lépésről lépésre szeretnéd)
-Ha manuálisan szeretnéd futtatni:
+### 3. Lépés: Tetszőleges egyedi port választása (pl. 8050 vagy 8888)
+Ha az 5050 helyett egy másik tetszőleges portot szeretnél használni, egyszerűen add meg indításkor a `PORT` környezeti változót:
+```bash
+PORT=8050 ./setup-venv.sh
+```
+Vagy manuális indítás esetén:
 ```bash
 # 1. Virtuális környezet létrehozása és bekapcsolása:
 python3 -m venv venv
@@ -39,25 +43,27 @@ source venv/bin/activate
 pip install --upgrade pip
 pip install -r requirements.txt
 
-# 3. Webes felület lefordítása (ha még nincs dist mappa):
+# 3. Webes felület lefordítása:
 npm install
 npm run build
 
-# 4. Szerver indítása az 5000-es porton:
-PORT=5000 python app.py
+# 4. Szerver indítása az 5050-es (vagy egyéni) porton:
+PORT=5050 python app.py
 ```
 
 Bármikor újraindíthatod a venv-ből a gyorsindítóval:
 ```bash
 ./run-venv.sh
+# vagy más porttal:
+PORT=8050 ./run-venv.sh
 ```
 
 ---
 
 ### 4. Lépés: Automatikus indítás bekapcsoláskor (Systemd háttérszolgáltatás)
-Ha szeretnéd, hogy a Raspberry Pi 4 bekapcsolásakor vagy újraindulásakor a családi recepttár magától elinduljon a háttérben a `venv`-ből:
+Ha szeretnéd, hogy a Raspberry Pi 4 bekapcsolásakor vagy újraindulásakor a családi recepttár magától elinduljon a háttérben a `venv`-ből a beállított porton:
 ```bash
-./install-pi-venv.sh
+PORT=5050 ./install-pi-venv.sh
 ```
 Ez regisztrálja a `csaladi-recepttar-venv.service` szolgáltatást a systemd-ben.
 Ellenőrizheted a működést:
@@ -70,8 +76,8 @@ sudo systemctl status csaladi-recepttar-venv
 ## 📱 Elérés a lakásban telefonról és tabletről
 
 Miután a szerver elindult a Raspberry Pi-n, nyisd meg bármely otthoni Wi-Fi-re kapcsolt eszközről:
-* **Helyi IP cím alapján:** `http://192.168.1.X:5000` (ahol az X a Pi címe a routeren)
-* **mDNS név alapján:** `http://raspberrypi.local:5000`
+* **Helyi IP cím alapján:** `http://192.168.1.X:5050` (ahol az X a Pi címe a routeren)
+* **mDNS név alapján:** `http://raspberrypi.local:5050`
 
 > 💡 **Konyhai tipp:** Nyisd meg a telefont vagy a konyhai falra/pultra kitett tabletet a fenti címen, majd a böngésző menüjében válaszd a **„Hozzáadás a kezdőképernyőhöz”** lehetőséget. Így teljes képernyős, érintőbarát konyhai szakácskönyvként használható.
 

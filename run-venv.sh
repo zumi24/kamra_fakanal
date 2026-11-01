@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Kamra & Fakanál — Gyorsindító Python venv virtuális környezetből (Port: 5000)
+# Kamra & Fakanál — Gyorsindító Python venv virtuális környezetből (Port: 5050)
 set -e
 
 APP_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -12,10 +12,11 @@ if [ ! -f "venv/bin/python" ]; then
   exit 1
 fi
 
-export PORT=5000
-export HOST=0.0.0.0
+PORT="${PORT:-5050}"
+export PORT="${PORT}"
+export HOST="0.0.0.0"
 
 echo "Indítás virtuális környezetből (venv): $(./venv/bin/python --version)"
-echo "Helyi hálózati port: 5000"
+echo "Helyi hálózati port: ${PORT}"
 
 exec ./venv/bin/python app.py

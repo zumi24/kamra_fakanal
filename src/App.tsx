@@ -22,6 +22,8 @@ import { RecipeDetailModal } from './components/RecipeDetailModal';
 import { RecipeFormModal } from './components/RecipeFormModal';
 import { PiDeploymentView } from './components/PiDeploymentView';
 import { WeeklyMealPlanner } from './components/WeeklyMealPlanner';
+import { VersionModal } from './components/VersionModal';
+import { APP_VERSION } from './config/version';
 
 type ActiveTab = 'recipes' | 'favorites' | 'planner' | 'pi-setup';
 
@@ -50,6 +52,7 @@ export function App() {
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
   const [isFormOpen, setIsFormOpen] = useState<boolean>(false);
   const [editingRecipe, setEditingRecipe] = useState<Recipe | null>(null);
+  const [isVersionOpen, setIsVersionOpen] = useState<boolean>(false);
 
   // Load initial data from backend (with fallback to initial dataset)
   useEffect(() => {
@@ -394,7 +397,16 @@ export function App() {
                       <div className="flex items-center gap-2 text-xs text-[#78716C]">
                         <span>Családi receptgyűjtemény</span>
                         <span aria-hidden="true">·</span>
-                        <span>Raspberry Pi 4 (Port 5000)</span>
+                        <span>Raspberry Pi 4 (Port {serverInfo?.targetPort || 5050})</span>
+                        <span aria-hidden="true">·</span>
+                        <button
+                          type="button"
+                          onClick={() => setIsVersionOpen(true)}
+                          className="font-mono-num font-semibold text-[#1C1917] hover:text-[#B93829] transition-colors cursor-pointer"
+                          title="Kattints a verzió részleteihez"
+                        >
+                          {APP_VERSION}
+                        </button>
                         <span aria-hidden="true">·</span>
                         <span className="font-mono-num">{recipes.length} recept</span>
                       </div>
@@ -752,13 +764,30 @@ export function App() {
       {/* Clean Footer */}
       <footer className="no-print border-t border-[#E7E2DA] bg-white mt-16 py-6 px-6">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#78716C]">
-          <div>
+          <div className="flex items-center gap-2.5 flex-wrap">
             <span className="font-display font-semibold text-[#1C1917]">
               Kamra &amp; Fakanál
-            </span>{' '}
-            — Családi receptadatbázis helyi hálózatra (Raspberry Pi 4 · Python venv · Port 5000)
+            </span>
+            <button
+              type="button"
+              onClick={() => setIsVersionOpen(true)}
+              className="inline-flex items-center gap-1 font-mono-num font-semibold text-[11px] text-[#57534E] hover:text-[#B93829] bg-[#FAF8F5] border border-[#E7E2DA] hover:border-[#B93829]/40 px-2 py-0.5 rounded transition-colors cursor-pointer"
+              title="Kattints a verzióinformáció és változásnapló megtekintéséhez"
+            >
+              {APP_VERSION}
+            </button>
+            <span aria-hidden="true">·</span>
+            <span>Családi receptadatbázis helyi hálózatra (Port {serverInfo?.targetPort || 5050})</span>
           </div>
           <div className="flex items-center gap-4">
+            <button
+              type="button"
+              onClick={() => setIsVersionOpen(true)}
+              className="hover:text-[#1C1917] transition-colors"
+            >
+              Változásnapló ({APP_VERSION})
+            </button>
+            <span aria-hidden="true">·</span>
             <button
               type="button"
               onClick={() => setActiveTab('pi-setup')}
@@ -780,6 +809,11 @@ export function App() {
           </div>
         </div>
       </footer>
+
+      {/* Version & Changelog Modal */}
+      {isVersionOpen && (
+        <VersionModal onClose={() => setIsVersionOpen(false)} />
+      )}
 
       {/* Recipe Detail & Print Modal */}
       {selectedRecipe && (
