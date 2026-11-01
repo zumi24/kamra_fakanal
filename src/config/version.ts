@@ -3,8 +3,8 @@
  * Minden új fejlesztésnél és módosításnál növelt verziószám.
  */
 
-export const APP_VERSION = 'v1.1.0';
-export const APP_VERSION_NUMBER = '1.1.0';
+export const APP_VERSION = 'v1.1.1';
+export const APP_VERSION_NUMBER = '1.1.1';
 export const APP_RELEASE_DATE = '2026. november 1.';
 
 export interface VersionHistoryItem {
@@ -15,6 +15,16 @@ export interface VersionHistoryItem {
 }
 
 export const VERSION_HISTORY: VersionHistoryItem[] = [
+  {
+    version: 'v1.1.1',
+    date: '2026. november 1.',
+    title: 'Raspberry Pi npm függőség javítás (.npmrc & legacy-peer-deps)',
+    changes: [
+      'Peer dependency ütközés (ERESOLVE) feloldása esbuild és vite között a Raspberry Pi-n',
+      'Automatikus --legacy-peer-deps beállítás a setup-venv.sh scriptben',
+      '.npmrc konfigurációs fájl hozzáadása a zökkenőmentes Pi telepítéshez',
+    ],
+  },
   {
     version: 'v1.1.0',
     date: '2026. november 1.',

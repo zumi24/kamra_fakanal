@@ -35,7 +35,7 @@ echo "[3/4] Python csomagok telepítése a venv-be (Flask, CORS, Gunicorn)..."
 if [ ! -d "dist" ]; then
   echo "[4/4] Webes felület (React) lefordítása..."
   if command -v npm >/dev/null 2>&1; then
-    npm install
+    npm install --legacy-peer-deps
     npm run build
   else
     echo "Figyelem: Az npm nem található, de a dist mappa nélkül a felület nem jelenik meg."
