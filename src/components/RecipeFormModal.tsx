@@ -6,19 +6,35 @@ import { RecipeImage } from './RecipeImage';
 
 interface RecipeFormModalProps {
   initialRecipe?: Recipe | null;
+  availableCategories?: RecipeCategory[];
   onClose: () => void;
   onSave: (recipeData: Omit<Recipe, 'id' | 'createdAt'>, existingId?: string) => Promise<void>;
+  onAddCustomCategory?: (newCategory: string) => void;
 }
 
 export const RecipeFormModal: React.FC<RecipeFormModalProps> = ({
   initialRecipe,
+  availableCategories,
   onClose,
   onSave,
+  onAddCustomCategory,
 }) => {
+  const [categoriesList, setCategoriesList] = useState<string[]>(() => {
+    const base = availableCategories && availableCategories.length > 0
+      ? availableCategories
+      : RECIPE_CATEGORIES;
+    if (initialRecipe?.category && !base.includes(initialRecipe.category)) {
+      return [...base, initialRecipe.category];
+    }
+    return base;
+  });
+  const [isAddingCategory, setIsAddingCategory] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState('');
+
   const [title, setTitle] = useState(initialRecipe?.title || '');
   const [subtitle, setSubtitle] = useState(initialRecipe?.subtitle || '');
   const [category, setCategory] = useState<RecipeCategory>(
-    initialRecipe?.category || 'Főételek'
+    initialRecipe?.category || categoriesList[0] || 'Főételek'
   );
   const [author, setAuthor] = useState(initialRecipe?.author || 'Anya konyhája');
   const [prepTimeMinutes, setPrepTimeMinutes] = useState(
@@ -124,6 +140,18 @@ export const RecipeFormModal: React.FC<RecipeFormModalProps> = ({
 
   const handleStepChange = (idx: number, val: string) => {
     setSteps((prev) => prev.map((s, i) => (i === idx ? val : s)));
+  };
+
+  const handleCreateCategory = () => {
+    const trimmed = newCategoryName.trim();
+    if (!trimmed) return;
+    if (!categoriesList.includes(trimmed)) {
+      setCategoriesList((prev) => [...prev, trimmed]);
+      onAddCustomCategory?.(trimmed);
+    }
+    setCategory(trimmed);
+    setNewCategoryName('');
+    setIsAddingCategory(false);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -250,13 +278,19 @@ export const RecipeFormModal: React.FC<RecipeFormModalProps> = ({
               />
             </div>
 
-            {/* Category selector buttons */}
-            <div>
-              <label className="block text-xs font-medium text-[#57534E] mb-1.5">
-                Kategória kiválasztása *
-              </label>
-              <div className="flex flex-wrap gap-2">
-                {RECIPE_CATEGORIES.map((cat) => (
+            {/* Category selector buttons and custom category creator */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <label className="block text-xs font-medium text-[#57534E]">
+                  Kategória kiválasztása *
+                </label>
+                <span className="text-[11px] text-[#78716C]">
+                  Válassz meglévőt vagy hozz létre újat
+                </span>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2">
+                {categoriesList.map((cat) => (
                   <button
                     key={cat}
                     type="button"
@@ -270,6 +304,55 @@ export const RecipeFormModal: React.FC<RecipeFormModalProps> = ({
                     {cat}
                   </button>
                 ))}
+
+                {!isAddingCategory ? (
+                  <button
+                    type="button"
+                    onClick={() => setIsAddingCategory(true)}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-dashed border-[#D6D1C7] text-[#57534E] hover:border-[#B93829] hover:text-[#B93829] bg-white transition-colors whitespace-nowrap shrink-0"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    + Saját kategória hozzáadása
+                  </button>
+                ) : (
+                  <div className="inline-flex items-center gap-1.5 p-1 bg-[#FAF8F5] border border-[#D6D1C7] rounded-lg">
+                    <input
+                      type="text"
+                      autoFocus
+                      value={newCategoryName}
+                      onChange={(e) => setNewCategoryName(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          handleCreateCategory();
+                        } else if (e.key === 'Escape') {
+                          setIsAddingCategory(false);
+                          setNewCategoryName('');
+                        }
+                      }}
+                      placeholder="Új kategória neve (pl. Saláták)..."
+                      className="px-2.5 py-1 text-xs bg-white border border-[#E7E2DA] rounded focus:outline-none focus:border-[#B93829] min-w-[180px]"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleCreateCategory}
+                      disabled={!newCategoryName.trim()}
+                      className="px-2.5 py-1 text-xs font-medium bg-[#B93829] text-white rounded hover:bg-[#992B1E] disabled:opacity-50 transition-colors"
+                    >
+                      Hozzáadás
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsAddingCategory(false);
+                        setNewCategoryName('');
+                      }}
+                      className="px-2 py-1 text-xs text-[#78716C] hover:text-[#1C1917]"
+                    >
+                      Mégse
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
 

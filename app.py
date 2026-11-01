@@ -254,7 +254,7 @@ def server_info():
     venv_active = is_virtualenv()
 
     return jsonify({
-        "version": "v1.1.1",
+        "version": "v1.2.0",
         "targetPort": target_port,
         "activePort": target_port,
         "storagePath": "data/recipes.json",

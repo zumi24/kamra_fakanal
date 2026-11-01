@@ -54,6 +54,36 @@ export function App() {
   const [editingRecipe, setEditingRecipe] = useState<Recipe | null>(null);
   const [isVersionOpen, setIsVersionOpen] = useState<boolean>(false);
 
+  // Custom user categories
+  const [customCategories, setCustomCategories] = useState<string[]>(() => {
+    try {
+      const saved = localStorage.getItem('kamra_custom_categories');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  const allCategories = useMemo(() => {
+    const set = new Set<string>(RECIPE_CATEGORIES);
+    customCategories.forEach((c) => set.add(c));
+    recipes.forEach((r) => {
+      if (r.category) set.add(r.category);
+    });
+    return Array.from(set);
+  }, [customCategories, recipes]);
+
+  const handleAddCustomCategory = (newCat: string) => {
+    const trimmed = newCat.trim();
+    if (!trimmed) return;
+    setCustomCategories((prev) => {
+      if (prev.includes(trimmed)) return prev;
+      const next = [...prev, trimmed];
+      localStorage.setItem('kamra_custom_categories', JSON.stringify(next));
+      return next;
+    });
+  };
+
   // Load initial data from backend (with fallback to initial dataset)
   useEffect(() => {
     async function fetchAll() {
@@ -137,11 +167,11 @@ export function App() {
   // Category counts
   const categoryCounts = useMemo(() => {
     const counts: Record<string, number> = { Összes: recipes.length };
-    RECIPE_CATEGORIES.forEach((cat) => {
+    allCategories.forEach((cat) => {
       counts[cat] = recipes.filter((r) => r.category === cat).length;
     });
     return counts;
-  }, [recipes]);
+  }, [allCategories, recipes]);
 
   // Handlers
   const handleToggleFavorite = async (id: string) => {
@@ -563,7 +593,7 @@ export function App() {
 
                 {/* Interactive Category Filter Buttons */}
                 <div className="flex items-center gap-2 overflow-x-auto pb-1">
-                  {(['Összes', ...RECIPE_CATEGORIES] as const).map((cat) => {
+                  {['Összes', ...allCategories].map((cat) => {
                     const isActive = selectedCategory === cat;
                     const count = categoryCounts[cat] ?? 0;
                     return (
@@ -834,6 +864,8 @@ export function App() {
       {isFormOpen && (
         <RecipeFormModal
           initialRecipe={editingRecipe}
+          availableCategories={allCategories}
+          onAddCustomCategory={handleAddCustomCategory}
           onClose={() => {
             setIsFormOpen(false);
             setEditingRecipe(null);

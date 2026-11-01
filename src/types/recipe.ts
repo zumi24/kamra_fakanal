@@ -1,10 +1,12 @@
-export type RecipeCategory =
+export type StandardRecipeCategory =
   | 'Levesek'
   | 'Főételek'
   | 'Egytálételek'
   | 'Desszertek'
   | 'Péksütemények'
   | 'Előételek & mártások';
+
+export type RecipeCategory = StandardRecipeCategory | string;
 
 export interface Ingredient {
   id: string;

@@ -3,8 +3,8 @@
  * Minden új fejlesztésnél és módosításnál növelt verziószám.
  */
 
-export const APP_VERSION = 'v1.1.1';
-export const APP_VERSION_NUMBER = '1.1.1';
+export const APP_VERSION = 'v1.2.0';
+export const APP_VERSION_NUMBER = '1.2.0';
 export const APP_RELEASE_DATE = '2026. november 1.';
 
 export interface VersionHistoryItem {
@@ -15,6 +15,17 @@ export interface VersionHistoryItem {
 }
 
 export const VERSION_HISTORY: VersionHistoryItem[] = [
+  {
+    version: 'v1.2.0',
+    date: '2026. november 1.',
+    title: 'Egyéni saját kategóriák hozzáadása',
+    changes: [
+      'Új recept rögzítésekor közvetlenül létrehozható egyedi kategória (+ Saját kategória hozzáadása)',
+      'Az új kategóriák azonnal bekerülnek a főkategória-szűrők közé és a receptkártyákra',
+      'Kategóriánkénti receptszámláló automatikus frissülése az egyéni kategóriákra is',
+      'Helyi és szerver oldali kategória-megőrzés',
+    ],
+  },
   {
     version: 'v1.1.1',
     date: '2026. november 1.',

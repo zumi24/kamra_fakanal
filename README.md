@@ -1,6 +1,6 @@
-# Kamra & Fakanál — Családi Recepttár (Raspberry Pi 4 · Python venv · Port 5050)
+# Kamra & Fakanál — Családi Recepttár (Raspberry Pi 4 · Python venv · Port 5050 · v1.2.0)
 
-Platformfüggetlen családi receptadatbázis és helyi hálózati webszerver, amelyet kifejezetten **Raspberry Pi 4-en való virtuális futtatásra (Python `venv`)**, valamint otthoni Wi-Fi hálózati kiszolgálásra (alapértelmezetten **5050-es porton**, hogy semmilyen más helyi programmal ne ütközzön) terveztünk.
+Platformfüggetlen családi receptadatbázis és helyi hálózati webszerver, amelyet kifejezetten **Raspberry Pi 4-en való virtuális futtatásra (Python `venv`)**, valamint otthoni Wi-Fi hálózati kiszolgálásra (alapértelmezetten **5050-es porton**, hogy semmilyen más helyi programmal ne ütközzön) terveztünk. A rendszer támogatja a saját egyéni receptkategóriák létrehozását is.
 
 ---
 
