@@ -1,0 +1,6 @@
+{
+  "name": "Kamra & Fakanál — Családi Recepttár",
+  "description": "Platformfüggetlen családi receptadatbázis és konyhai webszerver Raspberry Pi 4 támogatással, Python venv virtuális környezetben futtatható backenddel, adagkalkulátorral és nyomtatható receptkártyákkal.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
